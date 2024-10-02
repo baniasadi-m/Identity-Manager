@@ -1,0 +1,81 @@
+networks:
+  aidmnet:
+    name: aidmnet
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 192.168.240.0/24
+         gateway: 192.168.240.1
+
+volumes:
+  mysql_data:
+    name: aidm_mysql_data
+    driver: local
+  app_media:
+    name: aidm_mysql_data
+    driver: local
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${AIDM_IMAGE}:${AIDM_IMAGE_TAG}
+    container_name: ${AIDM_CONTAINER_NAME}
+    healthcheck:
+      test: ["CMD", "curl","-L","http://localhost:8000"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    ports:
+      - "${AIDM_PUBLISH_PORT}:8080"
+    volumes:
+      - app_media:/app/media
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=${DB_CONTAINER_NAME}
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - aidmnet
+
+  db:
+    image: ${DB_IMAGE}:${DB_IMAGE_TAG}
+    container_name: ${DB_CONTAINER_NAME}
+    restart: always
+    volumes: 
+      - mysql_data:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    command: '--default-authentication-plugin=mysql_native_password'
+    networks:
+      - aidmnet
+    logging:
+      # limit logs retained on host to 25MB
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "50"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
