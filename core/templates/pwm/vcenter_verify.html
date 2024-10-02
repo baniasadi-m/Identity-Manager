@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block contentwraper %}
-<h1 class="m-0 text-dark">احراز هویت</h1>
+<h1 class="m-0 text-dark"></h1>
 {% endblock%}
 {% block maincontent %}
-
-
 {% if messages %}
 <div class="row">
 <div class="col-sm-6 col-sm-offset-3">
@@ -21,11 +20,20 @@
 
 </div>
 {% endif %}
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p}}
-    <button type="submit">دریافت لینک</button>
-</form>
+<br>
+{% if cookie_status %}
 
+    <a href="{{ vcenter_url }}" class="nav-link active">
+
+      <h1 class="m-0 text-blue">Click Vcenter</h1>
+    </a>
+{% else %}
+<a href="{% url 'pwm:resetpass' %}" class="nav-link active">
+ 
+  <h1 class="m-0 text-blue">Verify</h1>
+  
+
+</a>
+{% endif %}
 
 {% endblock %}

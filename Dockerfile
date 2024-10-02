@@ -19,6 +19,7 @@ COPY ./core /app/
 COPY docker/django-entrypoint.sh /usr/local/bin/django-entrypoint.sh
 RUN chmod +x /usr/local/bin/django-entrypoint.sh
 
+COPY docker/valid_cookies.conf /etc/nginx/conf.d/valid_cookies.conf
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 COPY docker/supervisord.conf /etc/supervisord.conf

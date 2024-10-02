@@ -18,7 +18,7 @@ import subprocess
 def reload_nginx():
     try:
         # Execute the command to reload Nginx
-        subprocess.run(['sudo', 'nginx', '-s', 'reload'], check=True)
+        subprocess.run(['nginx', '-s', 'reload'], check=True)
         print("Nginx reloaded successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to reload Nginx: {e}")
@@ -45,6 +45,7 @@ def update_nginx_conf(new_cookie,nginx_file):
                 file.writelines(lines)
             
             print(f'Updated Nginx config with new cookie: {new_cookie}')
+            reload_nginx()
             return True
         else:
             print(f'Cookie "{new_cookie}" already exists in the configuration.')

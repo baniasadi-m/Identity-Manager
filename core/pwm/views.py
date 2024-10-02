@@ -186,7 +186,28 @@ class IndexView(WorkingHoursMixin,RedirectView):
 #     def get(self, request):
 #         form = self.form_class
 #         return render(request, self.template_name,context={'form': form})
+class VcenterView(LoginRequiredMixin, WorkingHoursMixin,View):
+    template_name = 'pwm/vcenter_verify.html'
+    success_url = 'http://test.masoud.com/vcenter'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not self.check_working_hours():
+            return HttpResponseForbidden("The application is closed at the moment.")
+        return super().dispatch(request, *args, **kwargs)
+ 
+    def get(self, request, *args, **kwargs):
+        profile = get_object_or_404(Profile,user=request.user)
+        cookie_status = False
+        cookie = self.request.COOKIES.get(f"aidm-{profile.pk}")
+        if cookie:
+            cookie_status=True
+
+        context = {
+            'vcenter_url': self.success_url,
+            'cookie_status' : cookie_status
+            
+        }
+        return render(request=request,template_name=self.template_name,context=context)
 class UserRegisterView(WorkingHoursMixin,CreateView):
     template_name = 'pwm/register_user.html'
     success_url = reverse_lazy('pwm:register_profile')
@@ -352,19 +373,20 @@ class ResetPassView(LoginRequiredMixin,VerifiedUserMixin,WorkingHoursMixin,View)
             messages.add_message(request,messages.ERROR,'Otp verify error')
             return redirect(self.success_url)
         from django.conf import settings
-        import random,uuid
+        import uuid
         cookie_val = str(uuid.uuid4()).replace('-', '')
-        cookie_name = str(profile.last_name) + str(random.randint(100, 999))
+        cookie_name = f"aidm-{str(profile.pk)}"
         result = update_nginx_conf(new_cookie=f"{cookie_name}={cookie_val}",nginx_file=f"{settings.NGINX_CONFIG_DIR}/{settings.NGINX_CONFIG_FILE}")
+
         if not result:
             messages.add_message(request,messages.ERROR,'Update Nginx Error')
             return redirect(self.success_url)
         
         else:
-            response = HttpResponseRedirect('http://test.masoud.com/vcenter/')  # Redirect to the target URL
-            response.set_cookie(cookie_name, value=cookie_val, max_age=3600,httponly=True)
-            print(response)
-            reload_nginx()
+            messages.add_message(request,messages.INFO,'Verified and click bellow link')
+
+            response =redirect('pwm:setcookie')  # Redirect to the target URL
+            response.set_cookie(cookie_name, value=cookie_val, max_age=60,httponly=True)
             return response
             # request.session[f'{cookie_name}'] = cookie_val
             # return redirect("http:/test.masoud.com")
