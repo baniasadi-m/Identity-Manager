@@ -16,7 +16,12 @@ from os import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+#### NGINX Config paths
 
+NGINX_CONFIG_DIR = "/etc/nginx/conf.d"
+NGINX_CONFIG_FILE = "valid_cookies.conf"
+
+VCENTER_DOMAIN= str(environ.get('VCENTER_DOMAIN','vcenter.aqr.net'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -26,8 +31,8 @@ SECRET_KEY = 'django-insecure-b5#-chd28v*!1x(efuvw0zo0f(wmyr%lt2%&2ap@7_e$%^_qs9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(environ.get('DJANGO_DEBUG','1')))
 
-ALLOWED_HOSTS = ['localhost','0.0.0.0','127.0.0.1','test.masoud.com']
-
+ALLOWED_HOSTS = ['localhost','0.0.0.0','127.0.0.1']
+ALLOWED_HOSTS.append(VCENTER_DOMAIN)
 
 # Application definition
 
@@ -158,7 +163,3 @@ LOGIN_URL = "pwm:login"
 LOGIN_REDIRECT_URL = "pwm:dashboard"
 LOGOUT_REDIRECT_URL = LOGIN_URL
 
-#### NGINX Config paths
-
-NGINX_CONFIG_DIR = "/etc/nginx/conf.d"
-NGINX_CONFIG_FILE = "valid_cookies.conf"
