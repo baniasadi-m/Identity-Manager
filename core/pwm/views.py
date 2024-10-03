@@ -187,8 +187,10 @@ class IndexView(WorkingHoursMixin,RedirectView):
 #         form = self.form_class
 #         return render(request, self.template_name,context={'form': form})
 class VcenterView(LoginRequiredMixin, WorkingHoursMixin,View):
+    from django.conf import settings
+    
     template_name = 'pwm/vcenter_verify.html'
-    success_url = 'http://test.masoud.com/vcenter'
+    success_url = f'http://{settings.VCENTER_DOMAIN}/ui'
 
     def dispatch(self, request, *args, **kwargs):
         if not self.check_working_hours():
@@ -196,6 +198,7 @@ class VcenterView(LoginRequiredMixin, WorkingHoursMixin,View):
         return super().dispatch(request, *args, **kwargs)
  
     def get(self, request, *args, **kwargs):
+        from django.conf import settings
         profile = get_object_or_404(Profile,user=request.user)
         cookie_status = False
         cookie = self.request.COOKIES.get(f"aidm-{profile.pk}")
@@ -204,7 +207,8 @@ class VcenterView(LoginRequiredMixin, WorkingHoursMixin,View):
 
         context = {
             'vcenter_url': self.success_url,
-            'cookie_status' : cookie_status
+            'cookie_status' : cookie_status,
+            'main_domain' : settings.VCENTER_DOMAIN
             
         }
         return render(request=request,template_name=self.template_name,context=context)
