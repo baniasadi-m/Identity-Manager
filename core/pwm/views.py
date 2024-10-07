@@ -3,7 +3,7 @@ from django.forms import BaseModelForm
 from django.shortcuts import render,HttpResponse,redirect
 from django.views.generic.base import TemplateView,RedirectView
 from django.views.generic import View,FormView,CreateView,ListView,DetailView
-from .forms import OTPVerificationForm, ProfileUserForm, UserRegisterForm, UserForm, ProfileForm, ResetPasswordForm, MobileForm, UserStatusForm
+from .forms import OTPVerificationForm, ProfileUserForm, UserRegisterForm, UserForm,ProfileEditForm, ProfileRegisterForm, ResetPasswordForm, MobileForm, UserStatusForm
 from accounts.models.profiles import Profile
 from accounts.models.users import UserTOTP,User
 from .models import WinServer
@@ -142,7 +142,7 @@ class EditProfileView(LoginRequiredMixin,VerifiedUserMixin,WorkingHoursMixin,Vie
         # print(request.profile)
         profile = get_object_or_404(Profile,user=request.user)
         user_form = UserForm(instance=request.user)
-        profile_form = ProfileForm(instance=profile)
+        profile_form = ProfileEditForm(instance=profile)
         # print(profile_form)
         return render(request, self.template_name, {
             'user_form': user_form,
@@ -154,7 +154,7 @@ class EditProfileView(LoginRequiredMixin,VerifiedUserMixin,WorkingHoursMixin,Vie
         print(request.user)
         profile = get_object_or_404(Profile,user=request.user)
         user_form = UserForm(request.POST, instance=request.user)
-        profile_form = ProfileForm(data=request.POST,files=request.FILES, instance=profile)
+        profile_form = ProfileEditForm(data=request.POST,files=request.FILES, instance=profile)
         print(f"profile validation is: {profile_form.is_valid()}")
 
         if  profile_form.is_valid():
@@ -242,7 +242,7 @@ class ProfileRegisterView(WorkingHoursMixin,View):
     def get(self, request, *args, **kwargs):
         user_id = request.session.get('user_id')
         profile = get_object_or_404(Profile,user=user_id)
-        profile_form = ProfileForm(instance=profile)
+        profile_form = ProfileRegisterForm(instance=profile)
         context = {
             'profile_form': profile_form
         }
@@ -251,7 +251,7 @@ class ProfileRegisterView(WorkingHoursMixin,View):
     def post(self, request, *args, **kwargs):
         user_id = request.session.get('user_id')
         profile = get_object_or_404(Profile,user=user_id)
-        profile_form = ProfileForm(data=request.POST,instance=profile)
+        profile_form = ProfileRegisterForm(data=request.POST,instance=profile)
 
         if profile_form.is_valid():
             profile = profile_form.save()

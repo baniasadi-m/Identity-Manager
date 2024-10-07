@@ -27,7 +27,7 @@ class UserForm(forms.ModelForm):
         super(UserForm, self).__init__(*args, **kwargs)
         self.fields['email'].disabled = True   
         
-class ProfileForm(forms.ModelForm):
+class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['user','nid', 'first_name', 'last_name',
@@ -35,14 +35,28 @@ class ProfileForm(forms.ModelForm):
                   'server'
                   ]        
     def __init__(self, *args, **kwargs):
-        super(ProfileForm, self).__init__(*args, **kwargs)
+        super(ProfileEditForm, self).__init__(*args, **kwargs)
         self.fields['user'].disabled = True   
         self.fields['nid'].disabled = True   
         self.fields['mobile'].disabled = True   
         self.fields['win_local_account'].disabled = True   
         self.fields['win_ldap_account'].disabled = True   
   
-
+class ProfileRegisterForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['user','nid', 'first_name', 'last_name',
+                  'mobile','win_local_account','win_ldap_account',
+                  'server'
+                  ]        
+    def __init__(self, *args, **kwargs):
+        super(ProfileRegisterForm, self).__init__(*args, **kwargs)
+        self.fields['user'].disabled = True   
+        # self.fields['nid'].disabled = True   
+        # self.fields['mobile'].disabled = True   
+        # self.fields['win_local_account'].disabled = True   
+        # self.fields['win_ldap_account'].disabled = True 
+        
 class MobileForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -64,7 +78,7 @@ class ProfileUserForm(forms.ModelForm):
         model = Profile
         fields = ['user']        
     def __init__(self, *args, **kwargs):
-        super(ProfileForm, self).__init__(*args, **kwargs)
+        super(ProfileEditForm, self).__init__(*args, **kwargs)
         self.fields['user'].disabled = True    
 
 class UserStatusForm(forms.ModelForm):
