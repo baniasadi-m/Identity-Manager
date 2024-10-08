@@ -190,13 +190,19 @@ class VcenterView(LoginRequiredMixin, WorkingHoursMixin,View):
     from django.conf import settings
     
     template_name = 'pwm/vcenter_verify.html'
-    success_url = f'http://{settings.VCENTER_DOMAIN}/ui'
+    success_url = reverse_lazy('pwm:setcookie')
 
     def dispatch(self, request, *args, **kwargs):
         if not self.check_working_hours():
             return HttpResponseForbidden("The application is closed at the moment.")
         return super().dispatch(request, *args, **kwargs)
- 
+
+    def get_success_url(self):
+        # Get the protocol and domain
+        base_url = f'{self.request.scheme}://{self.request.get_host()}'
+        # Construct the full success URL dynamically
+        return f'{base_url}'
+    
     def get(self, request, *args, **kwargs):
         from django.conf import settings
         profile = get_object_or_404(Profile,user=request.user)
@@ -204,13 +210,15 @@ class VcenterView(LoginRequiredMixin, WorkingHoursMixin,View):
         cookie = self.request.COOKIES.get(f"aidm-{profile.pk}")
         if cookie:
             cookie_status=True
+        self.success_url = self.get_success_url()
 
         context = {
-            'vcenter_url': self.success_url,
+            'vcenter_url': f"{self.success_url}/ui",
             'cookie_status' : cookie_status,
-            'main_domain' : settings.VCENTER_DOMAIN
+            'test_url' : f"{self.success_url}/test"
             
         }
+        
         return render(request=request,template_name=self.template_name,context=context)
 class UserRegisterView(WorkingHoursMixin,CreateView):
     template_name = 'pwm/register_user.html'
