@@ -24,6 +24,7 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 COPY docker/supervisord.conf /etc/supervisord.conf
 
+ENV TZ=Asia/Tehran
 
 EXPOSE 8080
 
